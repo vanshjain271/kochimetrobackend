@@ -43,6 +43,5 @@ def ocr_endpoint():
             os.remove(file_path)
             logging.info(f"Deleted uploaded file: {file_path}")
 
-if __name__ == "__main__":
-    logging.info("Starting Flask server on http://127.0.0.1:5000")
-    app.run(debug=True)
+
+    
