@@ -1,0 +1,4 @@
+2025-09-10 07:39:20,379 - INFO - Starting Flask OCR server...
+2025-09-10 07:39:20,428 - WARNING -  * Debugger is active!
+2025-09-10 07:39:20,441 - INFO -  * Debugger PIN: 114-846-819
+2025-09-10 07:40:29,828 - INFO -  * Detected change in '/Users/vanshjain/Desktop/SIH25/ocr_module.py', reloading

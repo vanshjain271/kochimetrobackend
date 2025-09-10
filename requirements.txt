@@ -1,0 +1,7 @@
+flask
+flask-cors
+pdfplumber
+pdf2image
+pytesseract
+googletrans==4.0.0rc1
+gunicorn

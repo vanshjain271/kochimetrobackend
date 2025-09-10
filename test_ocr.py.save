@@ -1,0 +1,15 @@
+import requests
+
+# URL of your Flask OCR endpoint
+url = "http://127.0.0.1:5000/ocr"
+
+# Open your test image
+files = {"file": open("test_image.png", "rb")}
+
+# Make POST request
+response = requests.post(url, files=files)
+
+# Print JSON response
+print(response.json())
+
+
