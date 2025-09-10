@@ -1,47 +1,40 @@
 # app.py
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from ocr_module import run_ocr
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
+import uvicorn
 import os
-import logging
 
-# Logging setup
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+from ocr_module import run_ocr
 
-app = Flask(__name__)
-CORS(app)
+app = FastAPI()
 
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# Root health-check
+@app.get("/")
+def root():
+    return {"message": "🚇 Kochi Metro Backend is live!"}
 
-@app.route("/ocr", methods=["POST"])
-def ocr_endpoint():
-    logging.info("Received request for OCR")
-    
-    if "file" not in request.files:
-        logging.warning("No file part in request")
-        return jsonify({"error": "No file uploaded"}), 400
-
-    file = request.files["file"]
-    if file.filename == "":
-        logging.warning("Empty filename received")
-        return jsonify({"error": "Empty filename"}), 400
-
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(file_path)
-    logging.info(f"Saved uploaded file to {file_path}")
-
+# OCR endpoint
+@app.post("/ocr")
+async def ocr_endpoint(file: UploadFile = File(...)):
     try:
-        result = run_ocr(file_path)
-        logging.info(f"OCR completed for file: {file.filename}")
-        return jsonify(result)
+        # Save uploaded file temporarily
+        temp_path = f"temp_{file.filename}"
+        with open(temp_path, "wb") as f:
+            f.write(await file.read())
+
+        # Run OCR
+        result = run_ocr(temp_path)
+
+        # Cleanup
+        os.remove(temp_path)
+
+        return JSONResponse(content={"success": True, "data": result})
+
     except Exception as e:
-        logging.error(f"OCR failed: {e}")
-        return jsonify({"error": str(e)}), 500
-    finally:
-        if os.path.exists(file_path):
-            os.remove(file_path)
-            logging.info(f"Deleted uploaded file: {file_path}")
+        return JSONResponse(
+            content={"success": False, "error": str(e)}, status_code=500
+        )
 
-
-    
+# Local dev entrypoint (not used in Render, but handy for testing)
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
