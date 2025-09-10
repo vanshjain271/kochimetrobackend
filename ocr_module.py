@@ -1,13 +1,12 @@
-# ocr_module.py
 import os
 from typing import List, Dict
 from pdf2image import convert_from_path
 import pytesseract
 import pdfplumber
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 from PIL import Image
 
-translator = Translator()
+translator = GoogleTranslator(source="auto", target="en")
 
 def run_ocr(file_path: str) -> List[Dict]:
     """
@@ -23,17 +22,17 @@ def run_ocr(file_path: str) -> List[Dict]:
                 if text.strip() == "":
                     images = convert_from_path(file_path, first_page=i, last_page=i)
                     text = pytesseract.image_to_string(images[0])
-                translated_text = translator.translate(text, dest="en").text
+                translated_text = translator.translate(text) if text.strip() else ""
                 result.append({
                     "page": i,
-                    "source": "ocr",
+                    "source": "ocr" if text else "pdf",
                     "original_text": text,
                     "translated_text": translated_text
                 })
     else:
         image = Image.open(file_path)
         text = pytesseract.image_to_string(image)
-        translated_text = translator.translate(text, dest="en").text
+        translated_text = translator.translate(text) if text.strip() else ""
         result.append({
             "page": 1,
             "source": "ocr",

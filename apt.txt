@@ -1,2 +1,2 @@
-teseract-ocr
+tesseract-ocr
 poppler-utils
